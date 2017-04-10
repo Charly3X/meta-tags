@@ -71,15 +71,13 @@ module MetaTags
     # @return [String] string with no HTML tags.
     #
     def self.strip_tags(string)
-      #ERB::Util.html_escape helpers.strip_tags(string)
-      # Fix strip_tags for Rails 4.2.0
-       # @see https://github.com/rails/rails/issues/18527
-       # @see https://github.com/rails/rails-html-sanitizer/issues/28
-       if defined?(Loofah)
-         Loofah.fragment(string).text(encode_special_chars: false)
-       else
-         helpers.strip_tags(string)
-       end
+      if defined?(Loofah)
+        # Instead of strip_tags we will use Loofah to strip tags from now on
+        stripped_unescaped = Loofah.fragment(string).text(encode_special_chars: false)
+        ERB::Util.html_escape stripped_unescaped
+      else
+        ERB::Util.html_escape helpers.strip_tags(string)
+      end
     end
 
     # This method returns a html safe string similar to what <tt>Array#join</tt>
